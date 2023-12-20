@@ -1,0 +1,41 @@
+     name: Build Executable
+
+     on:
+       # Trigger the workflow when there's a push to the main branch
+       push:
+         branches: [main]
+
+     jobs:
+       build:
+         runs-on: windows-latest
+         steps:
+           - uses: actions/checkout@v3
+
+           # Install Node.js
+           - uses: actions/setup-node@v3
+             with:
+               node-version: 16.x
+
+           # Install TypeScript
+           - run: npm install -g typescript
+
+           # Build the TypeScript project
+           - run: npm run build
+
+           # Package the TypeScript project into an executable
+           - run: npx electron-builder --win
+
+           # Upload the executable to GitHub Releases
+           - name: Upload Executable to GitHub Releases
+             uses: softprops/action-gh-release@v1
+             with:
+               files: dist/*.exe
+
+           # Create a new GitHub release
+           - name: Create a New GitHub Release
+             uses: softprops/action-gh-release@v1
+             with:
+               draft: false
+               prerelease: false
+             env:
+               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
